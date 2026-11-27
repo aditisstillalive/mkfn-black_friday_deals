@@ -80,6 +80,7 @@ async function route() {
   if (match) await showDeal(decodeURIComponent(match[1]));
   else {
     query = readQuery(location.hash, deals);
+    if (location.hash && location.hash !== writeQuery(query)) history.replaceState(null, '', writeQuery(query));
     showList();
   }
   window.scrollTo(0, 0);

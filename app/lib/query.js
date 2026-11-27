@@ -1,6 +1,6 @@
 // The shopper's search: read it from the address, write it back, and apply it to the deals.
-// A search lives in the hash (#/?q=mac&cat=Laptops&off=20&max=500&sort=off), so any view can be bookmarked or shared.
-// Anything in the address that is not a real category, store, verdict or step is dropped, never shown.
+// A search lives in the hash (#/?q=mac&cat=Laptops&off=20&max=500&sort=real), so any view can be bookmarked or shared.
+// Anything in the address that is not a category, store or verdict some deal has, or a real step, is dropped.
 
 import { VERDICTS, dealScore, realPercentOff, savings } from './rating.js';
 
@@ -24,12 +24,13 @@ export function readQuery(hash, deals = []) {
   const params = new URLSearchParams(at === -1 ? '' : hash.slice(at + 1));
   const cats = new Set(deals.map((d) => d.cat));
   const stores = new Set(deals.map((d) => d.store));
+  const verdicts = new Set(deals.map((d) => d.verdict).filter((v) => v in VERDICTS));
   const sort = params.get('sort');
   return {
     q: params.get('q') ?? '',
     cats: [...new Set(list(params.get('cat')))].filter((c) => cats.has(c)),
     stores: [...new Set(list(params.get('store')))].filter((s) => stores.has(s)),
-    verdicts: [...new Set(list(params.get('v')))].filter((v) => v in VERDICTS),
+    verdicts: [...new Set(list(params.get('v')))].filter((v) => verdicts.has(v)),
     off: step(params.get('off'), DISCOUNT_STEPS),
     max: step(params.get('max'), PRICE_CAPS),
     sort: sort in SORTS ? sort : 'score',
