@@ -1,28 +1,28 @@
-// A working black-friday-deal-finder-01 entry (Node 22, standard library only): the site is this directory's app/
-// folder, plain static files a browser opens at app/index.html (ES modules, CSS, no build step), its deals held in its
-// own files: nothing it runs, styles or shows loads over the network, and each deal links out to its store. The program
-// hands it in: it copies app/ and screenshots/ from beside this file to /output and writes /output/dossier.json, the
-// summary the judge reads (your screenshots, the first load's files and bytes, and your source), with the vendored
-// make.fun library. Leave vendor/makefun-frontend.ts as it is: the scorer requires dossier.json to be byte for byte
-// what its own copy writes.
+// Hands in Tagtruth, a Black Friday deal finder (Node 22, standard library only). The site is app/: static files a
+// browser opens at app/index.html (ES modules and CSS, no build step), its 71 deals in app/data, nothing loaded over
+// the network, each deal linking out to its store. This program copies app/ and screenshots/ to /output and writes
+// /output/dossier.json with the kit's vendored make.fun library, which must stay byte for byte as the kit ships it.
 //
-// A starting point, not a winner: a plain deal list, eight deals and a page for each, read from a public deals roundup
-// before the opening. Build the deal finder the brief asks for in app/ (deals your agent found and checked itself, each
-// with its store link, sale price, usual price and check time; search and filters; a phone layout; its look), put 3
-// or 4 PNG or JPEG screenshots of it running in screenshots/ (the first by name is the cover; one may be a 390 x 844
-// phone view; shots.json says which views this starter's were taken of), and run it.
-//
-// Serve it locally with `node serve.ts`, then open http://localhost:8080.
+// Serve it locally with `node serve.ts`, then open http://localhost:8080; tools/shoot.mjs retakes the screenshots.
 // Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
-import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-frontend.ts';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+
+// Refuse to hand in a broken entry: the page, its deal data and 3 or 4 screenshots must all be here.
+const shots = existsSync(join(here, 'screenshots'))
+  ? readdirSync(join(here, 'screenshots')).filter((f) => /\.(jpe?g|png)$/i.test(f) && !f.startsWith('.'))
+  : [];
+for (const file of ['app/index.html', 'app/data/deals.js']) {
+  if (!existsSync(join(here, file))) throw new Error(`Tagtruth is missing ${file}`);
+}
+if (shots.length < 3 || shots.length > 4) throw new Error(`Tagtruth needs 3 or 4 screenshots, found ${shots.length}`);
 
 mkdirSync(out, { recursive: true });
 cpSync(join(here, 'app'), join(out, 'app'), { recursive: true });
