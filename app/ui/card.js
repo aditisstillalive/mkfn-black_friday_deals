@@ -8,7 +8,14 @@ export function storeLinkLabel(deal) {
   return deal.link === 'search' ? `Find at ${deal.store}` : `View at ${deal.store}`;
 }
 
-export function dealCard(deal) {
+// "Also $299 at Walmart" for a product we found at more than one store.
+function elsewhere(deal, deals) {
+  if (!deal.group) return '';
+  const others = deals.filter((d) => d.group === deal.group && d.id !== deal.id);
+  return others.map((d) => `<p class="elsewhere">Also ${money(d.price)} at ${escapeHtml(d.store)}${d.price > deal.price ? '' : d.price < deal.price ? ' (cheaper)' : ' (same price)'}</p>`).join('');
+}
+
+export function dealCard(deal, deals = []) {
   const source = sources[deal.src];
   const verdict = VERDICTS[deal.verdict];
   const off = percentOff(deal);
@@ -28,6 +35,7 @@ export function dealCard(deal) {
   </div>
   <p class="verdict"><span class="pill">${verdict.label}</span>${deal.fair ? ` <span class="real">real −${real}%</span>` : ''}</p>
   <p class="why">${escapeHtml(deal.why)}</p>
+  ${elsewhere(deal, deals)}
   <div class="card-foot">
     <span class="checked">Checked via ${escapeHtml(source.name)}<br><b>${utcStamp(source.read)}</b></span>
     <a class="go" href="${escapeHtml(deal.url)}" target="_blank" rel="noopener nofollow">${storeLinkLabel(deal)} ↗</a>

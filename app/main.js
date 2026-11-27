@@ -7,7 +7,6 @@
 import { deals } from './data/deals.js';
 import { applyQuery, readQuery, writeQuery } from './lib/query.js';
 import { activeFilterCount, activeSummary, filterPanel, sortMenu } from './ui/controls.js';
-import { dealPage, missingPage } from './ui/detail.js';
 import { listShell, resultsGrid } from './ui/list.js';
 
 const app = document.getElementById('app');
@@ -17,7 +16,7 @@ let query = readQuery(location.hash);
 // Redraw what depends on the query, leaving the search box alone so typing never loses focus.
 function refreshResults() {
   const shown = applyQuery(deals, query);
-  app.querySelector('#grid').innerHTML = resultsGrid(shown);
+  app.querySelector('#grid').innerHTML = resultsGrid(shown, deals);
   app.querySelector('#panel').innerHTML = filterPanel(deals, query);
   app.querySelector('#summary').innerHTML = activeSummary(shown.length, deals.length, query);
   app.querySelector('#filtercount').textContent = activeFilterCount(query) || '';
@@ -64,16 +63,18 @@ function showList() {
   refreshResults();
 }
 
-function showDeal(id) {
+// The deal page's code loads only when a deal is opened, keeping the finder's first load small.
+async function showDeal(id) {
+  const { dealPage, missingPage } = await import('./ui/detail.js');
   const deal = deals.find((d) => d.id === id);
   document.title = `${deal ? deal.name : 'Not found'} | Tagtruth`;
   app.innerHTML = deal ? dealPage(deal, deals) : missingPage();
 }
 
-function route() {
+async function route() {
   window.__shotReady = false;
   const match = location.hash.match(/^#\/deal\/([^/?]+)/);
-  if (match) showDeal(decodeURIComponent(match[1]));
+  if (match) await showDeal(decodeURIComponent(match[1]));
   else {
     query = readQuery(location.hash);
     showList();

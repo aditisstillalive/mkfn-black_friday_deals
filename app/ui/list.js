@@ -16,7 +16,7 @@ export function listShell(query, total) {
   </form>
   <div class="layout">
     <details class="filters" id="filters" open>
-      <summary>Filters<span class="badge" id="filtercount">${n || ''}</span></summary>
+      <summary>Filters<span class="badge" id="filtercount">${n || ''}</span><span class="hint">category · store · % off · verdict</span></summary>
       <div id="panel"></div>
     </details>
     <div class="results">
@@ -28,8 +28,8 @@ export function listShell(query, total) {
 </section>`;
 }
 
-export function resultsGrid(shown) {
-  if (shown.length) return shown.map(dealCard).join('');
+export function resultsGrid(shown, all) {
+  if (shown.length) return shown.map((d) => dealCard(d, all)).join('');
   return `<li class="none"><strong>No deal matches all of that.</strong> Remove a filter above, or <button type="button" class="linkish" data-clear>clear them all</button>.</li>`;
 }
 

@@ -42,7 +42,7 @@ function otherStores(deal, deals) {
   const rows = deals
     .filter((d) => d.group === deal.group)
     .sort((a, b) => a.price - b.price)
-    .map((d) => `<tr${d.id === deal.id ? ' class="here"' : ''}><td>${escapeHtml(d.store)}</td><td>${money(d.price)}</td><td>${escapeHtml(d.terms ?? '')}</td><td><a href="${escapeHtml(d.url)}" target="_blank" rel="noopener nofollow">${storeLinkLabel(d)} ↗</a></td></tr>`)
+    .map((d) => `<tr${d.id === deal.id ? ' class="here"' : ''}><td>${escapeHtml(d.store)}</td><td>${money(d.price)}</td><td>${escapeHtml(d.terms ?? '–')}</td><td><a href="${escapeHtml(d.url)}" target="_blank" rel="noopener nofollow">${storeLinkLabel(d)} ↗</a></td></tr>`)
     .join('');
   return `<section class="compare"><h2>Same product, other stores</h2><table><thead><tr><th>Store</th><th>Price</th><th>Extras</th><th></th></tr></thead><tbody>${rows}</tbody></table></section>`;
 }
@@ -53,7 +53,7 @@ function related(deal, deals) {
     .sort((a, b) => dealScore(b) - dealScore(a))
     .slice(0, 3);
   if (!picks.length) return '';
-  return `<section class="related"><h2>More ${escapeHtml(deal.cat.toLowerCase())} deals</h2><ul class="grid">${picks.map(dealCard).join('')}</ul></section>`;
+  return `<section class="related"><h2>More ${escapeHtml(deal.cat.toLowerCase())} deals</h2><ul class="grid">${picks.map((d) => dealCard(d, deals)).join('')}</ul></section>`;
 }
 
 export function dealPage(deal, deals) {
@@ -86,8 +86,10 @@ export function dealPage(deal, deals) {
     ${real}
   </aside>
 </article>
-<section class="evidence"><h2>Where this price comes from</h2>${sourceTrail(deal)}</section>
-${otherStores(deal, deals)}
+<div class="below${deal.group ? ' two' : ''}">
+  <section class="evidence"><h2>Where this price comes from</h2>${sourceTrail(deal)}</section>
+  ${otherStores(deal, deals)}
+</div>
 ${related(deal, deals)}`;
 }
 
