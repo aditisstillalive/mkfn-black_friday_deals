@@ -1,5 +1,5 @@
 // Hands in Tagtruth, a Black Friday deal finder (Node 22, standard library only). The site is app/: static files a
-// browser opens at app/index.html (ES modules and CSS, no build step), its 71 deals in app/data, nothing loaded over
+// browser opens at app/index.html (ES modules and CSS, no build step), its 50 deals in app/data, nothing loaded over
 // the network, each deal linking out to its store. This program copies app/ and screenshots/ to /output and writes
 // /output/dossier.json with the kit's vendored make.fun library, which must stay byte for byte as the kit ships it.
 //

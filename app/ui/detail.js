@@ -2,9 +2,9 @@
 // where and when the price was read, the same product at other stores, and more deals like it.
 
 import { ageBetween, escapeHtml, hostOf, money, utcStamp } from '../lib/format.js';
-import { VERDICTS, dealScore, percentOff, realPercentOff, savings } from '../lib/rating.js';
+import { INFLATED, VERDICTS, dealScore, isInflated, percentOff, realPercentOff, savings } from '../lib/rating.js';
 import { sources } from '../data/sources.js';
-import { dealCard, storeLinkLabel } from './card.js';
+import { dealCard, reportAge, storeLinkLabel } from './card.js';
 
 // A bar from $0 to the usual price, marking the sale price and, where given, the going rate.
 function priceScale(deal) {
@@ -22,9 +22,8 @@ function priceScale(deal) {
 
 function sourceTrail(deal) {
   const source = sources[deal.src];
-  const posted = deal.posted ?? source.posted;
+  const { posted, stale } = reportAge(deal);
   const age = ageBetween(posted, source.read);
-  const stale = new Date(source.read) - new Date(posted) > 48 * 3.6e6;
   const confirm = deal.confirm
     ? `<li><span>Also seen</span>${money(deal.confirm.price)} on ${escapeHtml(sources[deal.confirm.src].name)}, ${utcStamp(deal.confirm.at)}</li>`
     : '';
@@ -33,7 +32,7 @@ function sourceTrail(deal) {
   <li><span>Source posted</span>${utcStamp(posted)}</li>
   <li><span>We checked it</span>${utcStamp(source.read)}, ${age} after it was posted${stale ? ' <em class="stale">older report: prices may have moved</em>' : ''}</li>
   ${confirm}
-  <li><span>Store link</span>${deal.link === 'search' ? `The source linked only to ${escapeHtml(deal.store)}'s sale page, so this opens a ${escapeHtml(deal.store)} search for the exact product` : `The product's own page at ${escapeHtml(deal.store)}`}</li>
+  <li><span>Store link</span>The product's own page, as the source linked it (affiliate tag removed)</li>
 </ul>`;
 }
 
@@ -60,8 +59,8 @@ export function dealPage(deal, deals) {
   const verdict = VERDICTS[deal.verdict];
   const conflict = deal.conflict ? `<p class="conflict"><strong>Prices disagree.</strong> ${escapeHtml(deal.conflict)}</p>` : '';
   const terms = deal.terms ? `<p class="terms"><strong>Conditions:</strong> ${escapeHtml(deal.terms)}</p>` : '';
-  const real = deal.fair
-    ? `<p class="realnote">Against its ${money(deal.fair)} going rate the real saving is <strong>${realPercentOff(deal)}%</strong>, not ${percentOff(deal)}%.</p>`
+  const real = isInflated(deal)
+    ? `<p class="realnote"><span class="flag">${INFLATED.label}</span> Against its ${money(deal.fair)} going rate the real saving is <strong>${realPercentOff(deal)}%</strong>, not ${percentOff(deal)}%.</p>`
     : '';
   return `<nav class="crumbs"><a href="#/">All deals</a> › <a href="#/?cat=${encodeURIComponent(deal.cat)}">${escapeHtml(deal.cat)}</a></nav>
 <article class="deal v-${deal.verdict}">
@@ -72,7 +71,7 @@ export function dealPage(deal, deals) {
       <strong class="now">${money(deal.price)}</strong>
       <s class="was">${money(deal.was)}</s>
       <span class="off">−${percentOff(deal)}%</span>
-      <span class="saved">you save ${money(savings(deal))}</span>
+      <span class="saved">${isInflated(deal) ? 'really ' : ''}you save ${money(savings(deal))}</span>
     </div>
     ${priceScale(deal)}
     ${conflict}
