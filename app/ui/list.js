@@ -6,20 +6,6 @@ import { sources } from '../data/sources.js';
 import { activeFilterCount, filterPanel, sortMenu } from './controls.js';
 import { dealCard } from './card.js';
 
-// "9 of 10" style tallies for the line that says up front where the deals come from.
-function tally(deals, keyOf) {
-  const counts = new Map();
-  for (const d of deals) counts.set(keyOf(d), (counts.get(keyOf(d)) ?? 0) + 1);
-  return [...counts].sort((a, b) => b[1] - a[1]);
-}
-
-function disclosure(deals) {
-  const bySource = tally(deals, (d) => sources[d.src].name).map(([name, n]) => `<b>${n}</b> from ${escapeHtml(name)}`).join(', ');
-  const byStore = tally(deals, (d) => d.store).map(([name, n]) => `${n} ${escapeHtml(name)}`).join(', ');
-  const confirmed = deals.filter((d) => d.confirm).length;
-  return `<p class="disclose">Where these prices come from: ${bySource}, with ${confirmed} also confirmed at the same price in a second source. Stores: ${byStore}. Every store link is the product's own page.</p>`;
-}
-
 export function listShell(query, deals) {
   const total = deals.length;
   const present = VERDICT_ORDER.filter((v) => deals.some((d) => d.verdict === v));
@@ -45,6 +31,20 @@ export function listShell(query, deals) {
     </div>
   </div>
 </section>`;
+}
+
+// "9 of 10" style tallies for the line that says up front where the deals come from.
+function tally(deals, keyOf) {
+  const counts = new Map();
+  for (const d of deals) counts.set(keyOf(d), (counts.get(keyOf(d)) ?? 0) + 1);
+  return [...counts].sort((a, b) => b[1] - a[1]);
+}
+
+function disclosure(deals) {
+  const bySource = tally(deals, (d) => sources[d.src].name).map(([name, n]) => `<b>${n}</b> from ${escapeHtml(name)}`).join(', ');
+  const byStore = tally(deals, (d) => d.store).map(([name, n]) => `${n} ${escapeHtml(name)}`).join(', ');
+  const confirmed = deals.filter((d) => d.confirm).length;
+  return `<p class="disclose">Where these prices come from: ${bySource}<span class="more">, with ${confirmed} also confirmed at the same price in a second source. Stores: ${byStore}. Every store link is the product's own page</span>.</p>`;
 }
 
 export function resultsGrid(shown, all) {

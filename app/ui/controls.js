@@ -6,6 +6,17 @@ import { escapeHtml } from '../lib/format.js';
 import { VERDICTS, VERDICT_ORDER } from '../lib/rating.js';
 import { DISCOUNT_STEPS, PRICE_CAPS, SORTS, facetCounts, isFiltered, stepCounts } from '../lib/query.js';
 
+export function filterPanel(deals, query) {
+  const cats = [...new Set(deals.map((d) => d.cat))].sort();
+  const stores = [...new Set(deals.map((d) => d.store))].sort();
+  const verdicts = VERDICT_ORDER.filter((v) => deals.some((d) => d.verdict === v));
+  return `${chipGroup('Category', 'cats', cats, query.cats, facetCounts(deals, query, 'cats', 'cat'))}
+${chipGroup('Store', 'stores', stores, query.stores, facetCounts(deals, query, 'stores', 'store'))}
+${stepGroup('Price', 'max', PRICE_CAPS, query.max, stepCounts(deals, query, 'max'), (s) => (s ? `≤ $${s.toLocaleString('en-US')}` : 'Any'))}
+${stepGroup('Real discount', 'off', DISCOUNT_STEPS, query.off, stepCounts(deals, query, 'off'), (s) => (s ? `${s}%+` : 'Any'))}
+${chipGroup('Is it really a deal?', 'verdicts', verdicts, query.verdicts, facetCounts(deals, query, 'verdicts', 'verdict'), (v) => VERDICTS[v].label)}`;
+}
+
 function chipGroup(title, field, options, chosen, counts, labelOf = (v) => v) {
   const chips = options
     .map((value) => {
@@ -26,17 +37,6 @@ function stepGroup(title, field, steps, chosen, counts, labelOf) {
     })
     .join('');
   return `<fieldset class="group"><legend>${title}</legend><div class="steps">${buttons}</div></fieldset>`;
-}
-
-export function filterPanel(deals, query) {
-  const cats = [...new Set(deals.map((d) => d.cat))].sort();
-  const stores = [...new Set(deals.map((d) => d.store))].sort();
-  const verdicts = VERDICT_ORDER.filter((v) => deals.some((d) => d.verdict === v));
-  return `${chipGroup('Category', 'cats', cats, query.cats, facetCounts(deals, query, 'cats', 'cat'))}
-${chipGroup('Store', 'stores', stores, query.stores, facetCounts(deals, query, 'stores', 'store'))}
-${stepGroup('Price', 'max', PRICE_CAPS, query.max, stepCounts(deals, query, 'max'), (s) => (s ? `≤ $${s.toLocaleString('en-US')}` : 'Any'))}
-${stepGroup('Real discount', 'off', DISCOUNT_STEPS, query.off, stepCounts(deals, query, 'off'), (s) => (s ? `${s}%+` : 'Any'))}
-${chipGroup('Is it really a deal?', 'verdicts', verdicts, query.verdicts, facetCounts(deals, query, 'verdicts', 'verdict'), (v) => VERDICTS[v].label)}`;
 }
 
 export function sortMenu(query) {

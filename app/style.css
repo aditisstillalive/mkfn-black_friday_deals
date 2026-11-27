@@ -161,6 +161,8 @@ main { max-width: 1320px; margin: 0 auto; padding: 18px 28px 32px; }
 
 /* Phone */
 @media (max-width: 760px) {
+  .disclose { font-size: 12.5px; margin-bottom: 8px; }
+  .disclose .more { display: none; }
   .masthead { padding: 10px 14px; gap: 6px 12px; }
   .brand { font-size: 22px; }
   .tagline { display: none; }

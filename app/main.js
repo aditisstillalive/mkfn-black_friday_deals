@@ -9,8 +9,8 @@ import { applyQuery, readQuery, writeQuery } from './lib/query.js';
 import { activeFilterCount, activeSummary, filterPanel } from './ui/controls.js';
 import { listShell, resultsGrid } from './ui/list.js';
 
-const app = document.getElementById('app');
-const phone = window.matchMedia('(max-width: 760px)');
+const finderRoot = document.getElementById('app');
+const phoneLayout = window.matchMedia('(max-width: 760px)');
 let query = readQuery(location.hash, deals);
 
 // Redraw what depends on the query, leaving the search box and sort menu alone so typing never loses focus. A chip
@@ -19,12 +19,12 @@ function refreshResults() {
   const shown = applyQuery(deals, query);
   const had = document.activeElement?.closest?.('#panel button');
   const key = had && `[data-${had.dataset.field ? 'field' : 'step'}="${had.dataset.field ?? had.dataset.step}"][data-value="${CSS.escape(had.dataset.value)}"]`;
-  app.querySelector('#grid').innerHTML = resultsGrid(shown, deals);
-  app.querySelector('#panel').innerHTML = filterPanel(deals, query);
-  if (key) app.querySelector(`#panel ${key}`)?.focus();
-  app.querySelector('#sort').value = query.sort;
-  app.querySelector('#summary').innerHTML = activeSummary(shown.length, deals.length, query);
-  app.querySelector('#filtercount').textContent = activeFilterCount(query) || '';
+  finderRoot.querySelector('#grid').innerHTML = resultsGrid(shown, deals);
+  finderRoot.querySelector('#panel').innerHTML = filterPanel(deals, query);
+  if (key) finderRoot.querySelector(`#panel ${key}`)?.focus();
+  finderRoot.querySelector('#sort').value = query.sort;
+  finderRoot.querySelector('#summary').innerHTML = activeSummary(shown.length, deals.length, query);
+  finderRoot.querySelector('#filtercount').textContent = activeFilterCount(query) || '';
 }
 
 function commit(next) {
@@ -45,24 +45,24 @@ function onClick(event) {
   else if (el.dataset.remove) {
     const field = el.dataset.remove;
     if (field === 'q') {
-      app.querySelector('#q').value = '';
+      finderRoot.querySelector('#q').value = '';
       commit({ ...query, q: '' });
     } else if (field === 'off' || field === 'max') commit({ ...query, [field]: 0 });
     else commit({ ...query, [field]: query[field].filter((v) => v !== el.dataset.value) });
   } else if (el.dataset.clear !== undefined) {
-    app.querySelector('#q').value = '';
+    finderRoot.querySelector('#q').value = '';
     commit(readQuery('#/', deals));
-    app.querySelector('#q').focus();
+    finderRoot.querySelector('#q').focus();
   }
 }
 
 function showList() {
   document.title = 'Tagtruth: Black Friday deals, price-checked';
-  app.innerHTML = listShell(query, deals);
-  app.querySelector('#filters').open = !phone.matches;
-  app.querySelector('#q').addEventListener('input', (e) => commit({ ...query, q: e.target.value }));
-  app.querySelector('#searchform').addEventListener('submit', (e) => e.preventDefault());
-  app.querySelector('#sort').addEventListener('change', (e) => commit({ ...query, sort: e.target.value }));
+  finderRoot.innerHTML = listShell(query, deals);
+  finderRoot.querySelector('#filters').open = !phoneLayout.matches;
+  finderRoot.querySelector('#q').addEventListener('input', (e) => commit({ ...query, q: e.target.value }));
+  finderRoot.querySelector('#searchform').addEventListener('submit', (e) => e.preventDefault());
+  finderRoot.querySelector('#sort').addEventListener('change', (e) => commit({ ...query, sort: e.target.value }));
   refreshResults();
 }
 
@@ -71,7 +71,7 @@ async function showDeal(id) {
   const { dealPage, missingPage } = await import('./ui/detail.js');
   const deal = deals.find((d) => d.id === id);
   document.title = `${deal ? deal.name : 'Not found'} | Tagtruth`;
-  app.innerHTML = deal ? dealPage(deal, deals) : missingPage();
+  finderRoot.innerHTML = deal ? dealPage(deal, deals) : missingPage();
 }
 
 async function route() {
@@ -87,6 +87,6 @@ async function route() {
   window.__shotReady = true;
 }
 
-app.addEventListener('click', onClick);
+finderRoot.addEventListener('click', onClick);
 window.addEventListener('hashchange', route);
 route();

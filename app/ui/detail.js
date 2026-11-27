@@ -6,6 +6,43 @@ import { INFLATED, VERDICTS, dealScore, isInflated, percentOff, realPercentOff, 
 import { sources } from '../data/sources.js';
 import { dealCard, reportAge, storeLinkLabel } from './card.js';
 
+export function dealPage(deal, deals) {
+  const verdict = VERDICTS[deal.verdict];
+  const conflict = deal.conflict ? `<p class="conflict"><strong>Prices disagree.</strong> ${escapeHtml(deal.conflict)}</p>` : '';
+  const terms = deal.terms ? `<p class="terms"><strong>Conditions:</strong> ${escapeHtml(deal.terms)}</p>` : '';
+  const real = isInflated(deal)
+    ? `<p class="realnote"><span class="flag">${INFLATED.label}</span> Against its ${money(deal.fair)} going rate the real saving is <strong>${realPercentOff(deal)}%</strong>, not ${percentOff(deal)}%.</p>`
+    : '';
+  return `<nav class="crumbs"><a href="#/">All deals</a> › <a href="#/?cat=${encodeURIComponent(deal.cat)}">${escapeHtml(deal.cat)}</a></nav>
+<article class="deal v-${deal.verdict}">
+  <div class="deal-main">
+    <p class="deal-store">${escapeHtml(deal.store)} · ${escapeHtml(deal.cat)}</p>
+    <h1>${escapeHtml(deal.name)}</h1>
+    <div class="prices big">
+      <strong class="now">${money(deal.price)}</strong>
+      <s class="was">${money(deal.was)}</s>
+      <span class="off">−${percentOff(deal)}%</span>
+      <span class="saved">${isInflated(deal) ? 'really ' : ''}you save ${money(savings(deal))}</span>
+    </div>
+    ${priceScale(deal)}
+    ${conflict}
+    <a class="go big" href="${escapeHtml(deal.url)}" target="_blank" rel="noopener nofollow">${storeLinkLabel(deal)} ↗</a>
+    ${terms}
+  </div>
+  <aside class="verdict-box">
+    <p class="verdict"><span class="pill">${verdict.label}</span><span class="score big" title="Tagtruth score">${dealScore(deal)}</span></p>
+    <p class="blurb">${verdict.blurb}.</p>
+    <p class="why">${escapeHtml(deal.why)}</p>
+    ${real}
+  </aside>
+</article>
+<div class="below${deal.group ? ' two' : ''}">
+  <section class="evidence"><h2>Where this price comes from</h2>${sourceTrail(deal)}</section>
+  ${otherStores(deal, deals)}
+</div>
+${related(deal, deals)}`;
+}
+
 // A bar from $0 to the usual price, marking the sale price and, where given, the going rate.
 function priceScale(deal) {
   const at = (n) => `${Math.max(0, Math.min(100, (n / deal.was) * 100)).toFixed(1)}%`;
@@ -53,43 +90,6 @@ function related(deal, deals) {
     .slice(0, 3);
   if (!picks.length) return '';
   return `<section class="related"><h2>More ${escapeHtml(deal.cat.toLowerCase())} deals</h2><ul class="grid">${picks.map((d) => dealCard(d, deals)).join('')}</ul></section>`;
-}
-
-export function dealPage(deal, deals) {
-  const verdict = VERDICTS[deal.verdict];
-  const conflict = deal.conflict ? `<p class="conflict"><strong>Prices disagree.</strong> ${escapeHtml(deal.conflict)}</p>` : '';
-  const terms = deal.terms ? `<p class="terms"><strong>Conditions:</strong> ${escapeHtml(deal.terms)}</p>` : '';
-  const real = isInflated(deal)
-    ? `<p class="realnote"><span class="flag">${INFLATED.label}</span> Against its ${money(deal.fair)} going rate the real saving is <strong>${realPercentOff(deal)}%</strong>, not ${percentOff(deal)}%.</p>`
-    : '';
-  return `<nav class="crumbs"><a href="#/">All deals</a> › <a href="#/?cat=${encodeURIComponent(deal.cat)}">${escapeHtml(deal.cat)}</a></nav>
-<article class="deal v-${deal.verdict}">
-  <div class="deal-main">
-    <p class="deal-store">${escapeHtml(deal.store)} · ${escapeHtml(deal.cat)}</p>
-    <h1>${escapeHtml(deal.name)}</h1>
-    <div class="prices big">
-      <strong class="now">${money(deal.price)}</strong>
-      <s class="was">${money(deal.was)}</s>
-      <span class="off">−${percentOff(deal)}%</span>
-      <span class="saved">${isInflated(deal) ? 'really ' : ''}you save ${money(savings(deal))}</span>
-    </div>
-    ${priceScale(deal)}
-    ${conflict}
-    <a class="go big" href="${escapeHtml(deal.url)}" target="_blank" rel="noopener nofollow">${storeLinkLabel(deal)} ↗</a>
-    ${terms}
-  </div>
-  <aside class="verdict-box">
-    <p class="verdict"><span class="pill">${verdict.label}</span><span class="score big" title="Tagtruth score">${dealScore(deal)}</span></p>
-    <p class="blurb">${verdict.blurb}.</p>
-    <p class="why">${escapeHtml(deal.why)}</p>
-    ${real}
-  </aside>
-</article>
-<div class="below${deal.group ? ' two' : ''}">
-  <section class="evidence"><h2>Where this price comes from</h2>${sourceTrail(deal)}</section>
-  ${otherStores(deal, deals)}
-</div>
-${related(deal, deals)}`;
 }
 
 export function missingPage() {

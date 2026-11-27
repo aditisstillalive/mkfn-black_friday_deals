@@ -4,24 +4,6 @@ import { escapeHtml, money, utcStamp } from '../lib/format.js';
 import { INFLATED, VERDICTS, dealScore, isInflated, percentOff, realPercentOff } from '../lib/rating.js';
 import { sources } from '../data/sources.js';
 
-export function storeLinkLabel(deal) {
-  return `View at ${deal.store}`;
-}
-
-// When the source posted this item, and whether that was more than 48 hours before we read it.
-export function reportAge(deal) {
-  const source = sources[deal.src];
-  const posted = deal.posted ?? source.posted;
-  return { posted, stale: new Date(source.read) - new Date(posted) > 48 * 3.6e6 };
-}
-
-// "Also $299 at Walmart" for a product we found at more than one store.
-function elsewhere(deal, deals) {
-  if (!deal.group) return '';
-  const others = deals.filter((d) => d.group === deal.group && d.id !== deal.id);
-  return others.map((d) => `<p class="elsewhere">Also ${money(d.price)} at ${escapeHtml(d.store)}${d.price > deal.price ? '' : d.price < deal.price ? ' (cheaper)' : ' (same price)'}</p>`).join('');
-}
-
 export function dealCard(deal, deals = []) {
   const source = sources[deal.src];
   const verdict = VERDICTS[deal.verdict];
@@ -49,4 +31,22 @@ export function dealCard(deal, deals = []) {
     <a class="go" href="${escapeHtml(deal.url)}" target="_blank" rel="noopener nofollow">${storeLinkLabel(deal)} ↗</a>
   </div>
 </li>`;
+}
+
+export function storeLinkLabel(deal) {
+  return `View at ${deal.store}`;
+}
+
+// When the source posted this item, and whether that was more than 48 hours before we read it.
+export function reportAge(deal) {
+  const source = sources[deal.src];
+  const posted = deal.posted ?? source.posted;
+  return { posted, stale: new Date(source.read) - new Date(posted) > 48 * 3.6e6 };
+}
+
+// "Also $299 at Walmart" for a product we found at more than one store.
+function elsewhere(deal, deals) {
+  if (!deal.group) return '';
+  const others = deals.filter((d) => d.group === deal.group && d.id !== deal.id);
+  return others.map((d) => `<p class="elsewhere">Also ${money(d.price)} at ${escapeHtml(d.store)}${d.price > deal.price ? '' : d.price < deal.price ? ' (cheaper)' : ' (same price)'}</p>`).join('');
 }
