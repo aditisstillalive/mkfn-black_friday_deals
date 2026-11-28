@@ -1,6 +1,6 @@
 [
   { "file": "1-finder.jpg", "path": "#/", "viewport": { "width": 1280, "height": 800 }, "steps": [{ "click": "button[data-step=\"off\"][data-value=\"20\"]" }] },
-  { "file": "2-search.jpg", "path": "#/?cat=Audio,Wearables", "viewport": { "width": 800, "height": 720 }, "steps": [{ "type": "#q", "text": "apple" }] },
-  { "file": "3-deal.jpg", "path": "#/deal/apple-watch-s12-42", "viewport": { "width": 800, "height": 720 } },
+  { "file": "2-search.jpg", "path": "#/?cat=Audio,Wearables", "viewport": { "width": 960, "height": 780 }, "steps": [{ "type": "#q", "text": "apple" }] },
+  { "file": "3-deal.jpg", "path": "#/deal/apple-watch-s12-42", "viewport": { "width": 800, "height": 860 } },
   { "file": "4-phone.jpg", "path": "#/?q=macbook", "viewport": { "width": 390, "height": 844 } }
 ]

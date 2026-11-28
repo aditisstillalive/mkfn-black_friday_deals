@@ -16,7 +16,7 @@ export function listShell(query, deals) {
   <form class="searchbar" role="search" id="searchform">
     <label for="q" class="sr">Search deals</label>
     <input id="q" type="search" placeholder="Search ${total} checked deals: AirPods, MacBook, Switch 2, all-time low…" value="${escapeHtml(query.q)}" autocomplete="off">
-    <span id="sortslot">${sortMenu(query)}</span>
+    ${sortMenu(query)}
   </form>
   <div class="layout">
     <details class="filters" id="filters" open>
@@ -44,7 +44,7 @@ function disclosure(deals) {
   const bySource = tally(deals, (d) => sources[d.src].name).map(([name, n]) => `<b>${n}</b> from ${escapeHtml(name)}`).join(', ');
   const byStore = tally(deals, (d) => d.store).map(([name, n]) => `${n} ${escapeHtml(name)}`).join(', ');
   const confirmed = deals.filter((d) => d.confirm).length;
-  return `<p class="disclose">Where these prices come from: ${bySource}<span class="more">, with ${confirmed} also confirmed at the same price in a second source. Stores: ${byStore}. Every store link is the product's own page</span>.</p>`;
+  return `<p class="disclose"><b>${deals.length} checked deals, ${confirmed} confirmed in two sources.</b> Where the prices come from: ${bySource}<span class="more">. Stores: ${byStore}. Every store link is the product's own page</span>.</p>`;
 }
 
 export function resultsGrid(shown, all) {

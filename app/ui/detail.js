@@ -62,14 +62,14 @@ function sourceTrail(deal) {
   const { posted, stale } = reportAge(deal);
   const age = ageBetween(posted, source.read);
   const confirm = deal.confirm
-    ? `<li><span>Also seen</span>${money(deal.confirm.price)} on ${escapeHtml(sources[deal.confirm.src].name)}, ${utcStamp(deal.confirm.at)}</li>`
+    ? `<li><span>Also seen</span><div>${money(deal.confirm.price)} on ${escapeHtml(sources[deal.confirm.src].name)}, ${utcStamp(deal.confirm.at)}</div></li>`
     : '';
   return `<ul class="trail">
-  <li><span>Price read in</span><a href="${escapeHtml(source.url)}" target="_blank" rel="noopener">${escapeHtml(source.name)}</a> (${escapeHtml(hostOf(source.url))}), which names ${escapeHtml(deal.store)} as the seller</li>
-  <li><span>Source posted</span>${utcStamp(posted)}</li>
-  <li><span>We checked it</span>${utcStamp(source.read)}, ${age} after it was posted${stale ? ' <em class="stale">older report: prices may have moved</em>' : ''}</li>
+  <li><span>Price read in</span><div><a href="${escapeHtml(source.url)}" target="_blank" rel="noopener">${escapeHtml(source.name)}</a> (${escapeHtml(hostOf(source.url))}), which names ${escapeHtml(deal.store)} as the seller</div></li>
+  <li><span>Source posted</span><div>${utcStamp(posted)}</div></li>
+  <li><span>We checked it</span><div>${utcStamp(source.read)}, ${age} after it was posted${stale ? ' <em class="stale">older report: prices may have moved</em>' : ''}</div></li>
   ${confirm}
-  <li><span>Store link</span>The product's own page, as the source linked it (affiliate tag removed)</li>
+  <li><span>Store link</span><div>The product's own page, as the source linked it (affiliate tag removed)</div></li>
 </ul>`;
 }
 
